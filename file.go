@@ -404,17 +404,16 @@ func (f *File) ToSlice() (output [][][]string, err error) {
 
 func (f *File) ToSliceNlines(n int) (output [][][]string, err error) {
 	output = [][][]string{}
+	if n == 0 {
+		n = 2
+	}
 	for _, sheet := range f.Sheets {
 		s := [][]string{}
-		i := 0
+		sheet.Rows = sheet.Rows[0:n]
 		for _, row := range sheet.Rows {
 			if row == nil {
 				continue
 			}
-			if i >= n {
-				break
-			}
-			i++
 			r := []string{}
 			for _, cell := range row.Cells {
 				str, err := cell.FormattedValue()
