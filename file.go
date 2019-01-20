@@ -408,13 +408,13 @@ func (f *File) ToSliceNlines(n int) (output [][][]string, err error) {
 		s := [][]string{}
 		i := 0
 		for _, row := range sheet.Rows {
+			if row == nil {
+				continue
+			}
 			if i >= n {
 				break
 			}
 			i++
-			if row == nil {
-				continue
-			}
 			r := []string{}
 			for _, cell := range row.Cells {
 				str, err := cell.FormattedValue()
