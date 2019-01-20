@@ -406,7 +406,10 @@ func (f *File) ToSliceNlines(n int) (output [][][]string, err error) {
 	output = [][][]string{}
 	for _, sheet := range f.Sheets {
 		s := [][]string{}
-		for row := 0; row < n; row++ {
+		for i, row := range sheet.Rows {
+			if i >= n {
+				break
+			}
 			if row == nil {
 				continue
 			}
