@@ -105,6 +105,33 @@ func FileToSlice(path string) ([][][]string, error) {
 	return f.ToSlice()
 }
 
+// A convenient wrapper around File.ToSliceNlines, FileToSliceNlines
+// will return the raw data contained in an Excel XLSX file as three
+// dimensional slice.  The first index represents the sheet number,
+// the second the row number, and the third the cell number.
+// This variant will only read in the specified nuber of lines.
+//
+// For example:
+//
+//    var mySlice [][][]string
+//    var value string
+//    mySlice = xlsx.FileToSliceNlines("myXLSX.xlsx", 2)
+//    value = mySlice[0][0][0]
+//
+// Here, value would be set to the raw value of the cell A1 in the
+// first sheet in the XLSX file.
+
+func FileToSliceNlines(path string, n int) ([][][]string, error) {
+	f, err := OpenFile(path)
+	if n == 0 {
+		n = 2
+	}
+	if err != nil {
+		return nil, err
+	}
+	return f.ToSliceNlines(n)
+}
+
 // FileToSliceUnmerged is a wrapper around File.ToSliceUnmerged.
 // It returns the raw data contained in an Excel XLSX file as three
 // dimensional slice. Merged cells will be unmerged. Covered cells become the
@@ -150,7 +177,7 @@ func (f *File) Write(writer io.Writer) (err error) {
 	return zipWriter.Close()
 }
 
-// Add a new Sheet, with the provided name, to a File. 
+// Add a new Sheet, with the provided name, to a File.
 // The maximum sheet name length is 31 characters. If the sheet name length is exceeded an error is thrown.
 // These special characters are also not allowed: : \ / ? * [ ]
 func (f *File) AddSheet(sheetName string) (*Sheet, error) {
@@ -351,6 +378,35 @@ func (f *File) ToSlice() (output [][][]string, err error) {
 	for _, sheet := range f.Sheets {
 		s := [][]string{}
 		for _, row := range sheet.Rows {
+			if row == nil {
+				continue
+			}
+			r := []string{}
+			for _, cell := range row.Cells {
+				str, err := cell.FormattedValue()
+				if err != nil {
+					// Recover from strconv.NumError if the value is an empty string,
+					// and insert an empty string in the output.
+					if numErr, ok := err.(*strconv.NumError); ok && numErr.Num == "" {
+						str = ""
+					} else {
+						return output, err
+					}
+				}
+				r = append(r, str)
+			}
+			s = append(s, r)
+		}
+		output = append(output, s)
+	}
+	return output, nil
+}
+
+func (f *File) ToSliceNlines(n int) (output [][][]string, err error) {
+	output = [][][]string{}
+	for _, sheet := range f.Sheets {
+		s := [][]string{}
+		for row := 0; row < n; row++ {
 			if row == nil {
 				continue
 			}
