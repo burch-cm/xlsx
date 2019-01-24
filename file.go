@@ -124,7 +124,7 @@ func FileToSlice(path string) ([][][]string, error) {
 func FileToSliceNlines(path string, n int) ([][][]string, error) {
 	f, err := OpenFile(path)
 	if n == 0 {
-		n = 2
+		n = 1
 	}
 	if err != nil {
 		return nil, err
@@ -405,7 +405,7 @@ func (f *File) ToSlice() (output [][][]string, err error) {
 func (f *File) ToSliceNlines(n int) (output [][][]string, err error) {
 	output = [][][]string{}
 	if n == 0 {
-		n = 2
+		n = 1
 	}
 	for _, sheet := range f.Sheets {
 		s := [][]string{}
