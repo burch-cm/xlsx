@@ -122,14 +122,14 @@ func FileToSlice(path string) ([][][]string, error) {
 // first sheet in the XLSX file.
 
 func FileToSliceNlines(path string, n int) ([][][]string, error) {
-	f, err := OpenFile(path)
+	f, err := OpenFileWithRowLimit(path, 2)
 	if n == 0 {
 		n = 1
 	}
 	if err != nil {
 		return nil, err
 	}
-	return f.ToSliceNlines(n)
+	return f.ToSlice(n)
 }
 
 // FileToSliceUnmerged is a wrapper around File.ToSliceUnmerged.
